@@ -1,0 +1,53 @@
+---
+title: "Muestra de Análisis de datos usando R"
+author: "Tesla Teach - Jairo Sánchez"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+---
+
+# Transacciones comerciales fraudulentas con uso de tarjetas
+
+Dataset: [card_transdata](https://www.kaggle.com/datasets/elakiyasekar/card-transdata "Elakiya Sekar")
+
+El dataset mencionado, disponible en la página web de [Kaggle](#0), incluye información de trasnsacciones realizadas con tarjeta (se supone tarjetas de crédito). Cada registro contiene datos asociados al lugar de la compra, la diferencia de la compra realizada respecto a la compra promedio del tarjetahabiente, detalles de la compra en relación a si la tarjeta usada es de chip o si se hizo uso de la clave de la tarjeta al momento de su uso, si la compra fue online o no, y el dato relacionado respecto a si esta compra fue calificada como fraude.
+
+El dataset presenta ciertas limitaciones que a su vez limitan el análisis de los datos, en este sentido, el conjunto de datos no dispone de información cronológica, es decir, el punto en el tiempo en el que suceden las transacciones y por ende, tampoco es posible conocer el periodo de tiempo de recolección de los datos.
+
+#### Información preliminar del conjunto de datos
+
+```{r Cargue de datos, echo=FALSE}
+# Cagar datos a una variable dataframe
+Data <- read.csv("card_transdata.csv")
+Variables <- data.frame(Variables = names(Data))
+print(Variables)
+# Dimensiones del conjunto de datos
+cat("El número de resgistros (filas) es de: ", 
+    format(nrow(Data),big.mark = ",")) # Total de observaciones o registros (filas)
+cat("El número de columnas (variables) es de: "
+    , ncol(Data)) # Total de variables o atributos (columnas)
+```
+
+##### Dimensiones del dataset
+
+```{r dimensiones dataset, echo=FALSE}
+
+```
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars, echo=FALSE}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
