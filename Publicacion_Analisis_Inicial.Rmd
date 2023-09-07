@@ -3,18 +3,20 @@ title: "Muestra de Análisis de datos usando R"
 author: "Tesla Teach - Jairo Sánchez"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
+  html_document: 
+    toc: yes
+    theme: cerulean
 ---
 
 # Transacciones comerciales fraudulentas con uso de tarjetas
 
 Dataset: [card_transdata](https://www.kaggle.com/datasets/elakiyasekar/card-transdata "Elakiya Sekar")
 
-El dataset mencionado, disponible en la página web de [Kaggle](#0), incluye información de trasnsacciones realizadas con tarjeta (se supone tarjetas de crédito). Cada registro contiene datos asociados al lugar de la compra, la diferencia de la compra realizada respecto a la compra promedio del tarjetahabiente, detalles de la compra en relación a si la tarjeta usada es de chip o si se hizo uso de la clave de la tarjeta al momento de su uso, si la compra fue online o no, y el dato relacionado respecto a si esta compra fue calificada como fraude.
+El dataset mencionado, disponible en la pagina web de [Kaggle](#0), incluye informacion de compras realizadas con tarjeta (se supone tarjetas de credito). Cada registro contiene datos asociados al lugar de la compra, la diferencia de la compra realizada respecto a la compra promedio del tarjetahabiente, detalles de la compra en relacion a si la tarjeta usada es de chip o si se hizo uso de la clave de la tarjeta al momento de la compra y si la misma fue online, el conjunto de datos condensa estas caracteristicas al concluir si la compra se tipifica como un fraude o si es una compra valida.
 
-El dataset presenta ciertas limitaciones que a su vez limitan el análisis de los datos, en este sentido, el conjunto de datos no dispone de información cronológica, es decir, el punto en el tiempo en el que suceden las transacciones y por ende, tampoco es posible conocer el periodo de tiempo de recolección de los datos.
+El dataset presenta ciertas limitaciones que a su vez limitan el analisis de los datos, en este sentido, el conjunto de datos no dispone de informacion cronologica, es decir, el punto en el tiempo en el que suceden las transacciones y por ende, tampoco es posible conocer el periodo de tiempo de recoleccion de los datos, adicionalmente, las informacion del conjunto de datos no precisa la unidad de medida de las variables de distancia.
 
-#### Información preliminar del conjunto de datos
+#### Informacion preliminar del conjunto de datos
 
 ```{r Cargue de datos, echo=FALSE}
 # Cagar datos a una variable dataframe
@@ -28,26 +30,37 @@ cat("El número de columnas (variables) es de: "
     , ncol(Data)) # Total de variables o atributos (columnas)
 ```
 
-##### Dimensiones del dataset
+Se entiende como variable de respuesta (o dependiente) "fraud" y las 7 variables restantes como variables independientes. Con esto, se espera interpretar el comportamiento de las compras tipificadas como fraude en funcion de las 7 variables independientes.
 
-```{r dimensiones dataset, echo=FALSE}
+#### Verificacion de existencia de valores perdidos (Missing Values - NA's)
 
+```{r missing values, echo=FALSE, message=FALSE, warning=FALSE}
+library(VIM)
+Nas <- aggr(Data)
+summary(Nas)
 ```
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+El conjunto de datos en cuestion no presenta valores perdios o NA's, en este caso, no es necesario un proceso de imputacion.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#### Detalles iniciales por cada variable
 
-```{r cars, echo=FALSE}
-summary(cars)
+Para cada variable se presenta un resumen de los principales parametros de estadistica descriptiva, esto, de acuerdo al tipo de variable. Se resalta que previo a este analisis las variables "distance_from_home", "distance_from_last_transaction" y "ratio_to_median_purchase_price" se mantienen como tipo numerica, las variables restantes se modifican a tipo factor ya que las mismas solo toman dos valores: 1 y 0, interpretando UNO como "SI" y CERO como "NO".
+
+```{r detalles por variable, echo=FALSE}
+numericas <- c(1,2,3) # vector con los indices de las columnas numericas del dataset
+i <- 1
+while (i<=ncol(Data)){
+  print(names(Data[i]))
+  Var <- Data[,i]
+  if (!(i %in% numericas)){
+    Var <- as.factor(Var)
+  }
+  print(class(Var))
+  print(summary(Var))
+  i = i + 1
+}
 ```
 
-## Including Plots
+Inicialmente se puede afirmar que las variables de distancia presentan una gran dispersion, situacion que es evidente dada la diferencia que existe entre la media de cada variable y su valor maximo asi como la diferencia tambien existente entre el valor del tercer cuartil y su valor maximo. Lo anterior puede interpretarse como una posible existencia de datos atipicos, no obstante, es necesario un mayor analisis, en especial la relacion que existente entre los datos cercanos al maximo y la variable de respuesta "fraud".
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Para el caso de las variables categoricas, se facilitaria su interpretacion si las mismas se presentan en valores relativos, esto es, en porcentajes.

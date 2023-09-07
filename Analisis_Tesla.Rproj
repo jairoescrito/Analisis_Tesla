@@ -7,7 +7,13 @@ AlwaysSaveHistory: Default
 EnableCodeIndexing: Yes
 UseSpacesForTab: Yes
 NumSpacesForTab: 2
-Encoding: WINDOWS-1252
+Encoding: UTF-8
 
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
+
+PythonType: conda
+PythonVersion: 3.10.9
+PythonPath: ~/anaconda3/bin/python3.10
+
+SpellingDictionary: es_ES
