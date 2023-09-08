@@ -8,6 +8,12 @@ output:
     theme: cerulean
 ---
 
+```{r librerías}
+library(VIM)
+library(ggplot2)
+library(cowplot)
+```
+
 # Transacciones comerciales fraudulentas con uso de tarjetas
 
 Dataset: [card_transdata](https://www.kaggle.com/datasets/elakiyasekar/card-transdata "Elakiya Sekar")
@@ -35,7 +41,6 @@ Se entiende como variable de respuesta (o dependiente) "fraud" y las 7 variables
 #### Verificacion de existencia de valores perdidos (Missing Values - NA's)
 
 ```{r missing values, echo=FALSE, message=FALSE, warning=FALSE}
-library(VIM)
 Nas <- aggr(Data)
 summary(Nas)
 ```
