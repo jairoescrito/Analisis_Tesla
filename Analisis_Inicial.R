@@ -29,49 +29,59 @@ while (i<=ncol(Data)){
   i = i + 1
 }
 
-## Paso 2. Visualización de comportamiento de las variables
-# Dar formato a los números que aparecen en la escala y de las gráficas
-marks_no_sci <- function(x) format(x, 
-                                   big.mark = ".", 
-                                   decimal.mark = ",", 
-                                   scientific = FALSE)
-# Función para gráficos de barras de las variables tipo factor
+## Paso 2. VISUALIZACIÓN DEL COMPORTAMIENTO DE LAS VARIABLES
 library(ggplot2)
 library(plotly)
-
-Grafico_Barras <- function(Datos){
-  ggplot(Data, aes(fill=fraud, x=Datos)) + 
-    geom_bar(position="dodge", stat="count") +
-    scale_y_continuous(labels = marks_no_sci) +
-    xlab("") +
-    ylab("Cantidad de registros")
-}
-# Generar gráficas de las variables tipo factor
-Plot_1 <- Grafico_Barras(Data[,4]) + ggtitle(names(Data[4])) 
-Plot_2 <- Grafico_Barras(Data[,5]) + ggtitle(names(Data[5]))
-Plot_3 <- Grafico_Barras(Data[,6]) + ggtitle(names(Data[6]))
-Plot_4 <- Grafico_Barras(Data[,7]) + ggtitle(names(Data[7]))
 library(cowplot)
-plot_grid(Plot_1,
-          Plot_2,
-          Plot_3,
-          Plot_4, 
-          labels = "AUTO")
+
+# ANÁLISIS DE LOS VALORES QUE TOMAN LAS VARIABLES UNA A UNA 
 # Generar tablas de frecuencias 
 # Función para crear una tabla de frecuencias tipo factor
-Frec_Factor <- function(Datos){
+Freq_Factor <- function(Datos){
   Tabla <- data.frame(table(Datos))
   Tabla$'Freq_Rel'<- round(Tabla$Freq/sum(Tabla$Freq),3)*100
   return(Tabla)
 }
-# Construir tabla de frecuencias variables factor
-Tabla_Fraude<-Frec_Factor(Data[8])
-Tabla_ComprasOnline <- Frec_Factor(Data[7])
-Tabla_PinTarjeta <- Frec_Factor(Data[6])
-Tabla_ChipTarjeta <- Frec_Factor(Data[5])
+# Construir tablas de frecuencias variables factor
+Lista_Tablas_Freq<-list()
+for (k in 4:8){
+  Lista_Tablas_Freq[[k]] <- Freq_Factor(Data[k])
+}
+# Generar las gráficas de frecuencia para variables factor  
+Graficas_Freq <- function(Tabla_Freq,x){
+  Paletas = c("Accent","Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3") 
+  g <- ggplot(Tabla_Freq,aes(x="", y=Freq_Rel, fill=fraud))+
+        geom_bar(stat="identity", width=1, color="white") +
+        coord_polar("y", start=0) + 
+        ggtitle(paste(Variables[x],"\n","Si(1) - No(2)")) +
+        ylab(element_blank()) +
+        xlab(element_blank()) +
+        geom_text(aes(label = paste(Freq_Rel,"%")),
+                  position = position_stack(vjust = 0.5)) + 
+        theme_void() +
+        scale_fill_brewer(palette=Paletas[sample(1:length(Paletas),1)]) + 
+        theme(legend.title = element_blank())
+  return(g)
+}
+
+
+
+
+
+
+
+Graficas_Freq[[1]]
+
+
+
+
+
+
+
+
 
 # Función para crear una tabla de frecuencias tipo numérica
-Frecuencias_Num <- function(Variable){
+Freq_Num <- function(Variable){
   # Calculo de parámetros básicos para la tabla de frecuencias
   Min <- trunc(min(Variable)) # Mínimo de los datos redondeado por abajo
   Max <- ceiling(max(Variable))# Máximo de los datos redondeado por arriba
@@ -96,16 +106,62 @@ Frecuencias_Num <- function(Variable){
   }
   Tabla <- cbind(Tabla,Freq)
   Tabla$Freq_Rel <- round(Tabla$Freq/length(Variable),6)*100
-  Tabla$Freq_Acum <- cumsum(Tabla$Freq_Rel) 
+  Tabla$Freq_Acum <- cumsum(Tabla$Freq_Rel)
+  return(Tabla)
+}
+# Construir tabla de frecuencias variables numéricas
+for (k in 1:3){
+  Tablas_Factor[[k]] <- Freq_Num(Data[k])
 }
 
-# Construir tabla de frecuencias variables factor
 
 
 
 
 
 
+
+
+# ANÁLISIS DE LOS VALORES QUE TOMAN LAS VARIABLES FRENTE A LA VARIABLE DE RESPUESTA 
+
+# Función para gráficos de barras de las variables tipo factor en relación a la variable de respuesta
+Grafico_Barras <- function(Datos){
+  # Dar formato a los números que aparecen en la escala y de las gráficas
+  marks_no_sci <- function(x) format(x, 
+                                     big.mark = ".", 
+                                     decimal.mark = ",", 
+                                     scientific = FALSE)
+  # Definición de paletas de colores
+  Paletas = c("Accent","Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3")
+  # Generación del gráfico
+  g<- ggplot(Data, aes(x=Datos, fill=fraud)) + 
+        geom_bar(position="dodge", stat="count") +
+        scale_y_continuous(labels = marks_no_sci) +
+        xlab("") +
+        ylab("Cantidad de registros") +
+        scale_fill_brewer(palette=Paletas[sample(1:length(Paletas),1)]) + 
+        labs(fill = "Fraude")
+  return(g)
+}
+# Generar gráficas de las variables tipo factor en relación a la variable de respuesta
+Plots_Barras<-list()
+l <- 4
+while (l <= 7){
+  Grafica <- Grafico_Barras(Data[,l])  
+  Grafica <- Grafica + ggtitle(paste(names(Data[l]),"\n","Si(1) - No(2)"))
+  Plots_Barras[[l]] <- Grafica
+  l = l + 1
+}
+plot_grid(Plots_Barras[[4]],
+          Plots_Barras[[5]],
+          Plots_Barras[[6]],
+          Plots_Barras[[7]], 
+          labels = "AUTO")
+
+
+
+
+ 
 
 
 

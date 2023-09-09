@@ -2,13 +2,9 @@
 title: "Muestra de Análisis de datos usando R"
 author: "Tesla Teach - Jairo Sánchez"
 date: "`r Sys.Date()`"
-output:
-  html_document: 
-    toc: yes
-    theme: cerulean
 ---
 
-```{r librerías}
+```{r librerías, message=FALSE, warning=FALSE, echo=FALSE}
 library(VIM)
 library(ggplot2)
 library(cowplot)
@@ -36,7 +32,7 @@ cat("El número de columnas (variables) es de: "
     , ncol(Data)) # Total de variables o atributos (columnas)
 ```
 
-Se entiende como variable de respuesta (o dependiente) "fraud" y las 7 variables restantes como variables independientes. Con esto, se espera interpretar el comportamiento de las compras tipificadas como fraude en funcion de las 7 variables independientes.
+Se entiende como variable de respuesta (o dependiente) "fraud" y las 7 variables restantes como independientes. Con esto, se espera interpretar el comportamiento de las compras tipificadas como fraude en funcion de las 7 variables independientes.
 
 #### Verificacion de existencia de valores perdidos (Missing Values - NA's)
 
@@ -45,7 +41,7 @@ Nas <- aggr(Data)
 summary(Nas)
 ```
 
-El conjunto de datos en cuestion no presenta valores perdios o NA's, en este caso, no es necesario un proceso de imputacion.
+El conjunto de datos en cuestion no presenta valores perdios o NA's, en este caso, no es necesario un proceso de tratamiento.
 
 #### Detalles iniciales por cada variable
 
@@ -69,3 +65,204 @@ while (i<=ncol(Data)){
 Inicialmente se puede afirmar que las variables de distancia presentan una gran dispersion, situacion que es evidente dada la diferencia que existe entre la media de cada variable y su valor maximo asi como la diferencia tambien existente entre el valor del tercer cuartil y su valor maximo. Lo anterior puede interpretarse como una posible existencia de datos atipicos, no obstante, es necesario un mayor analisis, en especial la relacion que existente entre los datos cercanos al maximo y la variable de respuesta "fraud".
 
 Para el caso de las variables categoricas, se facilitaria su interpretacion si las mismas se presentan en valores relativos, esto es, en porcentajes.
+
+Las siguientes tablas presentan los detalles, de cada una de las variables, de la cantidad de observaciones y el porcentaje de datos ubicados por los valores que toman.
+
+#### Análisis del comportamiento de los dato
+
+En este análisis se dividen las variables en dos grupos: 1) Las variables numericas y 2) las variables categóricas.
+
+##### 1) Variables numéricas
+
+En este grupo se listan tres de este tipo:
+
+-   distance_from_home: distancia entre el lugar de la compra y el lugar de residencia del titular de la tarjeta
+
+-   distance_from_last_transaction: distancia entre el lugar de la compra y el de la compra inmediatamente anterior
+
+-   ratio_to_median_purchase_price: proporción del valor de la compra en relación al valor promedio de compra (o pago) que se realiza con la tarjeta
+
+##### Dispersión de los datos de las variables numéricas
+
+Al verificar los datos que toman cada una de las variables numéricas se observa que presentan una gran dispersión, tal como se había mencionado en los detalles iniciales para cada variable, esta variabilidad se presenta de manera gráfica así:
+
+```{r gráficos boxplot variables numericas, echo=FALSE}
+# Función para graficar de cajas para variables numéricas
+Plot_Caja_Num<-function(Datos,k){
+  g <- ggplot(Datos, aes(x = "", y=Data[,k])) +
+        geom_boxplot(outlier.colour="red") + 
+        ggtitle(paste(Variables[k,1])) +
+        ylab(element_blank()) +
+        xlab(element_blank()) +
+        theme_minimal()
+  return(g)
+}
+# Análisis de la dispersión de las variables numéricas
+# Guardar las gráficas de columna de las variables numéricas
+Lista_BoxPlot <- list()
+for (l in 1:3){
+  Grafica <- Plot_Caja_Num(Data,l)
+  Lista_BoxPlot[[l]] <- Grafica
+}
+# Generar las 3 gráficas en una sola imagen
+plot_grid(Lista_BoxPlot[[1]],
+          Lista_BoxPlot[[2]],
+          Lista_BoxPlot[[3]]
+          )
+```
+
+Los gráficos de caja o bigotes muestran una cantidad puntos rojos (datos atípicos) los cuales se interpretan como valores fuera del "común" de los valores que toma normalmente cada variable. Sobre estos puntos es posible decidir excluirlos del conjunto de datos o mantenerlos, decisión que depende del conocimiento del negocio, del nivel de relevancia de la información que contienen estos puntos atípico (como registro completo), entre otros.
+
+La variabilidad de los datos para las tres variables se observa similar, es decir, no existe una diferencia relevante entre una y otra.
+
+##### Frecuencias los datos de las variables numéricas
+
+Con los resultados del conteo de datos por rango es posible cuantificar el nivel de relevancia de los datos atípicos observados en las gráficas anteriores, lo cual refleja que los mismos representan menos del 0.05% del total de datos. En un análisis previo se plantearon alrededor de 20 clases o rangos para contabilizar la frecuencia, sin embargo, la dispersión de los valores hacía innecesario usar tal cantidad de clases, finalmente se toman un total de 4 clases las cuales dejan en evidencia como se distribuyen los datos en cada variable
+
+```{r Tabla frecuencias variables numericas y gráficos, echo=FALSE}
+# Lista para guardar las tablas de frecuencias de las 8 variables
+Lista_Tablas_Freq<-list()
+# Función para crear una tabla de frecuencias tipo numérica
+Freq_Num <- function(Variable){
+  # Calculo de parámetros básicos para la tabla de frecuencias
+  Min <- trunc(min(Variable)) # Mínimo de los datos redondeado por abajo
+  Max <- ceiling(max(Variable))# Máximo de los datos redondeado por arriba
+  Rango <- Max - Min # El rango de variación de los datos
+  # NumIntervalos <- ceiling(1+log2(Datos)) # Cantidad de intervalos, redondeado para obtener el numero entero
+  NumIntervalos <- 4
+  Ancho <- ceiling(Rango/NumIntervalos) # Amplitud - Ancho de cada intervalo
+  # Columna con los límites inferiores y superiores de cada clase para el histograma
+  Inferior <- NULL
+  Superior <- NULL
+  Intervalo <-NULL
+  for (i in 1:(NumIntervalos)){
+    Inferior <- rbind(Inferior,Min+Ancho*(i-1))
+    Superior <- rbind(Superior,Min+Ancho*i)
+    Intervalo <- rbind(Intervalo,paste(Min+Ancho*(i-1)," - ",Min+Ancho*i))
+  }
+  # Construcción de dataframe con los límites de las clases
+  Intervalo = as.factor(Intervalo)
+  Tabla <- data.frame(Inferior,Superior, Intervalo) # Intervalos para tabla de frecuencias
+  Freq <- NULL
+  # Calculo de frecuencia por clases definidas
+  for (i in 1:nrow(Tabla)){
+    Freq<- rbind(Freq,
+                 sum(Variable>=Tabla[i,1] & Variable<Tabla[i,2])
+    )
+  }
+  # Unir los datos en un solo dataframe
+  Tabla <- cbind(Tabla,Freq)
+  Tabla$Freq_Rel <- round(Tabla$Freq/sum(Freq),6)*100
+  Tabla$Freq_Acum <- cumsum(Tabla$Freq_Rel)
+  return(Tabla)
+}
+# Construir tabla de frecuencias variables numéricas
+for (k in 1:3){
+  Lista_Tablas_Freq[[k]] <- Freq_Num(Data[k])
+}
+# Función para crear gráfica de columnas para las frecuencias de variables
+# numéricas
+Plot_Bar_Freq <- function(Datos,l){
+  Paletas = c("Accent","Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3")
+  g <- ggplot(Datos, 
+              aes(x = Intervalo,
+                  y = Freq_Rel,
+                  fill = Intervalo))
+  g + geom_bar(stat = "identity") + 
+    ggtitle(paste(Variables[l,1])) +
+    # se ocultan los nombres de los ejes (porque con la opción polar pierden sentido)
+    ylab("% del Total de Observaciones") +
+    xlab("Rango de datos") +
+    labs(fill = "Rango de Datos") + 
+    scale_fill_brewer(palette=Paletas[sample(1:length(Paletas),1)]) +
+    geom_text(aes(label = paste(Freq_Rel,"%")),
+              position = position_stack(vjust = 0.5))
+}
+Lista_PlotBar_Freq<-list()
+for (l in 1:3){
+  Grafica <- Plot_Bar_Freq(Lista_Tablas_Freq[[l]],l)
+  Lista_PlotBar_Freq[[l]] <- Grafica
+}
+#plot_grid(Lista_PlotBar_Freq[[1]],
+#          Lista_PlotBar_Freq[[2]],
+#          Lista_PlotBar_Freq[[3]]
+#)
+Lista_PlotBar_Freq[[1]]
+Lista_PlotBar_Freq[[2]]
+Lista_PlotBar_Freq[[3]]
+```
+
+##### 2) Variables categóricas
+
+En este conjunto de variables se observan cinco. Cabe resaltar que todas la variables se presenta como respuesta a una pregunta, a saber:
+
+-   repeat_retailer: ¿se había presentado con anterioridad pagos o compras en el establecimiento comercial'
+
+-   used_chip: ¿se hizo uso del chip de la tarjeta para hacer el pago?
+
+-   used_pin_number: ¿el pago incluyo como requisito el ingreso del pin de la tarjeta?
+
+-   online_order: ¿es una compra a través de internet?
+
+-   fraud: ¿el pago realizado se tipifica como un fraude?
+
+Para este grupo de variables se determina la frecuencia según los posibles valores que puede tomar cada una (0 y 1) para todas. En este caso, la distribución de los datos no es tan marcada como en el caso de las variables numéricas. En el caso de la variable de respuesta (fraud) el valor "No" tiene un peso de alrededor del 91%, siendo esta la mayor proporción entre las cinco variables. El el caso de las variables repeat_retailer y used_pin_number los resultados de la respuesta "No" están ligeramente por debajo del 90%; finalmente las variables used_chip y online_order presentan una proporción practicamemente igual donde la respuesta "Si" se presenta con un porcentaje de participación alrededor del 35%.
+
+```{r Tabla frecuencias variables categóricas y gráficos, echo=FALSE}
+# Función para crear una tabla de frecuencias tipo factor
+Freq_Factor <- function(Datos){
+  Tabla <- data.frame(table(Datos))
+  Tabla$'Freq_Rel'<- round(Tabla$Freq/sum(Tabla$Freq),3)*100
+  return(Tabla)
+}
+# Construir tablas de frecuencias variables factor
+
+for (k in 4:8){
+  Lista_Tablas_Freq[[k]] <- Freq_Factor(Data[k])
+}
+# Generar las gráficas de frecuencia para variables factor  
+Plot_Pie_Freq <- function(Tabla_Freq,v){
+  # Vector con las paletas de colores disponibles en ggplot2
+  Paletas = c("Accent","Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3") 
+  g <- ggplot(Lista_Tablas_Freq[[v]],aes(x="", y=Freq_Rel, fill=Lista_Tablas_Freq[[v]][,1])) +
+    # La anterior línea define los datos a graficar, en fill se le entregan los niveles de factores
+    geom_bar(stat="identity", width=1, color="white") +
+    # En ggplot no existe grafico circular, sobre la gráfica de barras se ajusta a polar
+    coord_polar("y", start=0) + 
+    # Título de la gráfica
+    ggtitle(paste(Variables[v,1],"\n","Si(1) - No(2)")) +
+    # se ocultan los nombres de los ejes (porque con la opción polar pierden sentido)
+    ylab(element_blank()) +
+    xlab(element_blank()) +
+    # Se incluyen las etiquetas de datos
+    geom_text(aes(label = paste(Freq_Rel,"%")),
+              position = position_stack(vjust = 0.5)) +
+    # Se elimina el contorno de la gráfica (para descargarla visualmente)
+    theme_void() +
+    # Se cambia el color de las gráficas, se asigna color de manera aleatoria
+    # tomandolo de la paleta de colores
+    scale_fill_brewer(palette=Paletas[sample(1:length(Paletas),1)]) +
+    # Se oculta el título de las etiquetas
+    theme(legend.title = element_blank())
+  return(g)
+}
+# Lista vacía para guardar las gráficas variables factor
+Lista_Plot_Pie_Freq<-list()
+# Generar las gráficas factor y guardarlas en la lista
+l <- 4
+while (l <= 8){
+  Grafica <- Plot_Pie_Freq(Lista_Tablas_Freq[[l]],l)  
+  #Grafica <- Grafica + ggtitle(paste(names(Data[l]),"\n","Si(1) - No(2)"))
+  Lista_Plot_Pie_Freq[[l]] <- Grafica
+  l = l + 1
+}
+# Dibujar las gráficas de factor en una sola imagen
+plot_grid(Lista_Plot_Pie_Freq[[4]],
+          Lista_Plot_Pie_Freq[[5]],
+          Lista_Plot_Pie_Freq[[6]],
+          Lista_Plot_Pie_Freq[[7]],
+          Lista_Plot_Pie_Freq[[8]]
+)
+```
+
+Se destaca que el 8.7% de los datos disponibles obedecen a situaciones de fraude, exactamente se tienen un total de 87.403 registros con información de fraude.
