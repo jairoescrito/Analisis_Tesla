@@ -23,4 +23,5 @@ gitcreds_set()
 Conectar con repositorio
 '
 use_git()
+use_github()
 usethis::use_github()
