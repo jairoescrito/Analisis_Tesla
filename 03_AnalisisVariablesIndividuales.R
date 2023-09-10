@@ -4,6 +4,7 @@ library(cowplot)
 
 # ANÁLISIS DE LOS VALORES QUE TOMAN LAS VARIABLES UNA A UNA
 
+# Análisis de la dispersión de las variables numéricas
 # Función para graficar de cajas para variables numéricas
 Plot_Caja_Num<-function(Datos,k){
   g <- ggplot(Datos, aes(x = "", y=Data[,k])) +
@@ -14,19 +15,11 @@ Plot_Caja_Num<-function(Datos,k){
     theme_minimal()
   return(g)
 }
-# Análisis de la dispersión de las variables numéricas
-
-# Guardar las gráficas de columna de las variables numéricas
-Lista_BoxPlot <- list()
-for (l in 1:3){
-  Grafica <- Plot_Caja_Num(Data,l)
-  Lista_BoxPlot[[l]] <- Grafica
-}
 # Generar las 3 gráficas en una sola imagen
-plot_grid(Lista_BoxPlot[[1]],
-          Lista_BoxPlot[[2]],
-          Lista_BoxPlot[[3]]
-)
+plot_grid(Plot_Caja_Num(Data,1),
+          Plot_Caja_Num(Data,2),
+          Plot_Caja_Num(Data,3)
+          )
 
 # Análisis de Frecuencias
 
@@ -88,14 +81,10 @@ Plot_Bar_Freq <- function(Datos,l){
     geom_text(aes(label = paste(Freq_Rel,"%")),
               position = position_stack(vjust = 0.5))
 }
-Lista_PlotBar_Freq<-list()
-for (l in 1:3){
-  Grafica <- Plot_Bar_Freq(Lista_Tablas_Freq[[l]],l)
-  Lista_PlotBar_Freq[[l]] <- Grafica
-}
-plot_grid(Lista_PlotBar_Freq[[1]],
-          Lista_PlotBar_Freq[[2]],
-          Lista_PlotBar_Freq[[3]]
+# Gráfico de barras de frecuencia variables numéricas en una sola imagen
+plot_grid(Plot_Bar_Freq(Lista_Tablas_Freq[[1]],1),
+          Plot_Bar_Freq(Lista_Tablas_Freq[[2]],2),
+          Plot_Bar_Freq(Lista_Tablas_Freq[[3]],3)
 )
 
 # Función para crear una tabla de frecuencias tipo factor
@@ -105,7 +94,6 @@ Freq_Factor <- function(Datos){
   return(Tabla)
 }
 # Construir tablas de frecuencias variables factor
-
 for (k in 4:8){
   Lista_Tablas_Freq[[k]] <- Freq_Factor(Data[k])
 }
@@ -121,8 +109,7 @@ Plot_Pie_Freq <- function(Tabla_Freq,v){
     # Título de la gráfica
     ggtitle(paste(Variables[v,1],"\n","Si(1) - No(2)")) +
     # se ocultan los nombres de los ejes (porque con la opción polar pierden sentido)
-    ylab(element_blank()) +
-    xlab(element_blank()) +
+    ylab(element_blank()) + xlab(element_blank()) +
     # Se incluyen las etiquetas de datos
     geom_text(aes(label = paste(Freq_Rel,"%")),
               position = position_stack(vjust = 0.5)) +
@@ -135,24 +122,13 @@ Plot_Pie_Freq <- function(Tabla_Freq,v){
     theme(legend.title = element_blank())
   return(g)
 }
-# Lista vacía para guardar las gráficas variables factor
-Lista_Plot_Pie_Freq<-list()
-# Generar las gráficas factor y guardarlas en la lista
-l <- 4
-while (l <= 8){
-  Grafica <- Plot_Pie_Freq(Lista_Tablas_Freq[[l]],l)  
-  #Grafica <- Grafica + ggtitle(paste(names(Data[l]),"\n","Si(1) - No(2)"))
-  Lista_Plot_Pie_Freq[[l]] <- Grafica
-  l = l + 1
-}
 # Dibujar las gráficas de factor en una sola imagen
-plot_grid(Lista_Plot_Pie_Freq[[4]],
-          Lista_Plot_Pie_Freq[[5]],
-          Lista_Plot_Pie_Freq[[6]],
-          Lista_Plot_Pie_Freq[[7]],
-          Lista_Plot_Pie_Freq[[8]]
-)
-
+plot_grid(Plot_Pie_Freq(Lista_Tablas_Freq[[4]],4),
+          Plot_Pie_Freq(Lista_Tablas_Freq[[5]],5),
+          Plot_Pie_Freq(Lista_Tablas_Freq[[6]],6),
+          Plot_Pie_Freq(Lista_Tablas_Freq[[7]],7),
+          Plot_Pie_Freq(Lista_Tablas_Freq[[8]],8)
+          )
 # Número total de registros de fraude
 TotalFraudes = sum(Data$fraud==1)
 TotalFraudes
