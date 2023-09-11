@@ -62,7 +62,7 @@ Lista_Tablas_Freq<-list()
 for (k in 1:3){
   Lista_Tablas_Freq[[k]] <- Freq_Num(Data[k])
 }
-
+Lista_Tablas_Freq[[1]]
 # Función para crear gráfica de columnas para las frecuencias de variables
 # numéricas
 Plot_Bar_Freq <- function(Datos,l){

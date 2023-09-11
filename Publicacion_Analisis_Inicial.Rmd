@@ -8,6 +8,7 @@ date: "`r Sys.Date()`"
 library(VIM)
 library(ggplot2)
 library(cowplot)
+library(tidyverse)
 ```
 
 # Transacciones comerciales fraudulentas con uso de tarjetas
@@ -18,7 +19,7 @@ El dataset mencionado, disponible en la pagina web de [Kaggle](#0), incluye info
 
 El dataset presenta ciertas limitaciones que a su vez limitan el analisis de los datos, en este sentido, el conjunto de datos no dispone de informacion cronologica, es decir, el punto en el tiempo en el que suceden las transacciones y por ende, tampoco es posible conocer el periodo de tiempo de recoleccion de los datos, adicionalmente, las informacion del conjunto de datos no precisa la unidad de medida de las variables de distancia.
 
-#### Informacion preliminar del conjunto de datos
+## 1. Informacion preliminar del conjunto de datos
 
 ```{r Cargue de datos, echo=FALSE}
 # Cagar datos a una variable dataframe
@@ -34,7 +35,7 @@ cat("El número de columnas (variables) es de: "
 
 Se entiende como variable de respuesta (o dependiente) "fraud" y las 7 variables restantes como independientes. Con esto, se espera interpretar el comportamiento de las compras tipificadas como fraude en funcion de las 7 variables independientes.
 
-#### Verificacion de existencia de valores perdidos (Missing Values - NA's)
+### 1.1. Verificacion de existencia de valores perdidos (Missing Values - NA's)
 
 ```{r missing values, echo=FALSE, message=FALSE, warning=FALSE}
 Nas <- aggr(Data)
@@ -43,21 +44,21 @@ summary(Nas)
 
 El conjunto de datos en cuestion no presenta valores perdios o NA's, en este caso, no es necesario un proceso de tratamiento.
 
-#### Detalles iniciales por cada variable
+## 2. Detalles iniciales por cada variable
 
 Para cada variable se presenta un resumen de los principales parametros de estadistica descriptiva, esto, de acuerdo al tipo de variable. Se resalta que previo a este analisis las variables "distance_from_home", "distance_from_last_transaction" y "ratio_to_median_purchase_price" se mantienen como tipo numerica, las variables restantes se modifican a tipo factor ya que las mismas solo toman dos valores: 1 y 0, interpretando UNO como "SI" y CERO como "NO".
 
 ```{r detalles por variable, echo=FALSE}
-numericas <- c(1,2,3) # vector con los indices de las columnas numericas del dataset
+# Creación de variables tipo factor
+numericas <- c(1,2,3) # vector con los índices de las columnas númericas del dataset
 i <- 1
 while (i<=ncol(Data)){
   print(names(Data[i]))
-  Var <- Data[,i]
   if (!(i %in% numericas)){
-    Var <- as.factor(Var)
+    Data[,i] <- as.factor(Data[,i])
   }
-  print(class(Var))
-  print(summary(Var))
+  print(class(Data[,i]))
+  print(summary(Data[,i]))
   i = i + 1
 }
 ```
@@ -68,11 +69,11 @@ Para el caso de las variables categoricas, se facilitaria su interpretacion si l
 
 Las siguientes tablas presentan los detalles, de cada una de las variables, de la cantidad de observaciones y el porcentaje de datos ubicados por los valores que toman.
 
-#### Análisis del comportamiento de los dato
+## 3. Análisis del comportamiento de los datos
 
 En este análisis se dividen las variables en dos grupos: 1) Las variables numericas y 2) las variables categóricas.
 
-##### 1) Variables numéricas
+### 3.1 Variables numéricas
 
 En este grupo se listan tres de este tipo:
 
@@ -82,7 +83,7 @@ En este grupo se listan tres de este tipo:
 
 -   ratio_to_median_purchase_price: proporción del valor de la compra en relación al valor promedio de compra (o pago) que se realiza con la tarjeta
 
-##### Dispersión de los datos de las variables numéricas
+#### 3.1.1 Dispersión de los datos de las variables numéricas
 
 Al verificar los datos que toman cada una de las variables numéricas se observa que presentan una gran dispersión, tal como se había mencionado en los detalles iniciales para cada variable, esta variabilidad se presenta de manera gráfica así:
 
@@ -115,7 +116,7 @@ Los gráficos de caja o bigotes muestran una cantidad puntos rojos (datos atípi
 
 La variabilidad de los datos para las tres variables se observa similar, es decir, no existe una diferencia relevante entre una y otra.
 
-##### Frecuencias los datos de las variables numéricas
+#### 3.1.2 Frecuencias los datos de las variables numéricas
 
 Con los resultados del conteo de datos por rango es posible cuantificar el nivel de relevancia de los datos atípicos observados en las gráficas anteriores, lo cual refleja que los mismos representan menos del 0.05% del total de datos. En un análisis previo se plantearon alrededor de 20 clases o rangos para contabilizar la frecuencia, sin embargo, la dispersión de los valores hacía innecesario usar tal cantidad de clases, finalmente se toman un total de 4 clases las cuales dejan en evidencia como se distribuyen los datos en cada variable
 
@@ -192,11 +193,11 @@ Lista_PlotBar_Freq[[2]]
 Lista_PlotBar_Freq[[3]]
 ```
 
-##### 2) Variables categóricas
+### 3.2 Variables categóricas
 
 En este conjunto de variables se observan cinco. Cabe resaltar que todas la variables se presenta como respuesta a una pregunta, a saber:
 
--   repeat_retailer: ¿se había presentado con anterioridad pagos o compras en el establecimiento comercial'
+-   repeat_retailer: ¿se había presentado con anterioridad pagos o compras en el establecimiento comercial?
 
 -   used_chip: ¿se hizo uso del chip de la tarjeta para hacer el pago?
 
@@ -258,11 +259,114 @@ while (l <= 8){
 }
 # Dibujar las gráficas de factor en una sola imagen
 plot_grid(Lista_Plot_Pie_Freq[[4]],
-          Lista_Plot_Pie_Freq[[5]],
-          Lista_Plot_Pie_Freq[[6]],
-          Lista_Plot_Pie_Freq[[7]],
-          Lista_Plot_Pie_Freq[[8]]
-)
+          Lista_Plot_Pie_Freq[[5]])
+plot_grid(Lista_Plot_Pie_Freq[[6]],
+          Lista_Plot_Pie_Freq[[7]])
+Lista_Plot_Pie_Freq[[8]]
 ```
 
 Se destaca que el 8.7% de los datos disponibles obedecen a situaciones de fraude, exactamente se tienen un total de 87.403 registros con información de fraude.
+
+## 4. Análisis de los datos frente a la variable de respuesta (fraud)
+
+### 4.1 Variables numéricas 
+
+Para cada una de las tres variables numéricas se replantea el gráfico de frecuencias, en este caso se especifica la cantidad de datos comparándolo con el resultado frente a la existencia o no de fraude. Como se mencionó anteriormente, la mayor cantidad de datos se encuentra en el primer rango planteado en cada variable (esto es, alrededor del 99% de las observaciones), al desglosarlo en función del fraude se encuentra que las proporciones se mantienen similar para las tres variable, es decir, alrededor del 91.25% (más de 912.500 observaciones) de los datos se asocian a la no existencia de fraude, mientras alrededor de un 8.75% (alrededor de 87.300 registros) de los datos del mismo rango se asocian a una trasacciones tipificadas como fraude. Los resultados observados podrían dar indicios de una posible colinealidad de las variables, frente a esta situación podría plantearse la exclusión de los datos atípicos identificados en el numeral 3.1.1, esto con el fin de verificar si existe una relación diferente en estas variables frente al fraude y así obtener mayor información que faciliten el entendimiento de los eventos de fraude.
+
+```{r Variables numericas frente a fraud, echo=FALSE}
+# Relación de las variables numéricas frente a las variables de respuesta
+Data_Aux <- Data[,c(1,2,3,8)] # Crear un dataframe auxiliar para crear factores de las variables numéricas
+nombres = names(Data_Aux)
+for (i in 1:3){
+  Data_Aux <- Data_Aux %>% # Usando tidyverse - dplyr se crean variables de asignación de 
+    # cada dato al rango correspondiente. Esto se hace porque en la tabla de frecuencias no
+    # se especifican los conteos segun el valor de la respuesta "fraud"
+    mutate(Rango = case_when( # Se verifica cada dato en que rango de frecuencia está
+      Data_Aux[i] < Lista_Tablas_Freq[[i]][1,2] ~ Lista_Tablas_Freq[[i]][1,3],
+      Data_Aux[i] < Lista_Tablas_Freq[[i]][2,2] ~ Lista_Tablas_Freq[[i]][2,3],
+      Data_Aux[i] < Lista_Tablas_Freq[[i]][3,2] ~ Lista_Tablas_Freq[[i]][3,3],
+      Data_Aux[i] < Lista_Tablas_Freq[[i]][4,2] ~ Lista_Tablas_Freq[[i]][4,3],
+    )
+    )
+  nombres = c(nombres, paste(nombres[i],"_Rango"))
+  names(Data_Aux) = nombres
+}
+Data_Aux <- Data_Aux[,c(5,6,7,4)] # Reordenar la data auxiliar
+nombres <- names(Data_Aux)
+# construir función de gráfico de barras variables numéricas frente a fraude
+Plot_Bar_Num <- function(Data,l){ # Data para ingresar el Data_Aux y l el número de la variable en Data_Aux
+  marks_no_sci <- function(x) format(x, big.mark = ".", decimal.mark = ",", scientific = FALSE)
+  Paletas = c("Accent","Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3")
+  g <- ggplot(Data_Aux, aes(x=Data[,l], fill=fraud)) + 
+          geom_bar(position="dodge", stat="count") +
+          scale_y_continuous(labels = marks_no_sci) +
+          xlab("Rangos") + ylab("Cantidad de registros") +
+          scale_fill_brewer(palette=Paletas[sample(1:length(Paletas),1)]) + 
+          labs(fill = "Fraude") + 
+          ggtitle(paste(Variables[l,1],"\n","Si(1) - No(2)")) +
+          geom_text(stat='count', aes(x = Data_Aux[,l],label = ..count..), 
+                    position = position_dodge(width = 1),
+                    vjust = -0.2, hjust= 0.4, size = 3)
+  return(g)
+}
+# Crear la imagen de gráficas en una sola vista
+Plot_Bar_Num(Data_Aux,1)
+Plot_Bar_Num(Data_Aux,2)
+Plot_Bar_Num(Data_Aux,3)
+
+```
+
+### 4.2 Variables categóricas
+
+En cuanto al comportamiento de las variables categóricas, los resultados frente a la variable no muestran uniformidad una a otra como sucede con las numéricas.
+
+-   repeat_retailer: se observa un mayor número de registros asociados a transacciones de fraude cuando esta se realiza en establecimientos en los que ya se han hecho transacciones con anterioridad (al menos 1): alrededor del 91% (algo más de 804.600 registros) no se observan como fraude mientras que un 9% (un valor cercano a 77.000 registros) si lo serían; esta misma proporción se observa para los establecimientos en los que se realiza una transacción por primera vez con la tarjeta usada.
+
+-   used_chip:el no uso de chip en la transacción comercial es lo más común en los registros disponibles, en este caso se observa un 10% (casi 65.000 observaciones) de transacciones asociadas a fraude. Para el caso de las operaciones en las que se hace uso del chip de la tarjeta el porcentaje de las mismas tipificadas como fraude son del 6% (alrededor de 22.400 registros)
+
+-   used_pin_number: en este item, un número alrededor de 87.100 observaciones (cerca del 10%) que mencionan el no uso de pin (clave) de la tarjeta se tipificaron como fraude. Cuando se registra uso del pin de la tarjeta el porcentaje de fraude identificado es inferior al 0.3% (273 transacciones)
+
+-   online_order: en el caso de las compras por internet los resultados muestran una mayor proporción de fraudes cuando la transacción cumple esta característica, es decir, un valor cercano al 13% se tipificaron como fraude (un poco mas de 82.700 transacciones) mientras que las compras no realizadas por internet registran un nivel de fraude del de alrededor del 1.35%, esto es, un número cercano a las 47.000 transacciones.
+
+```{r Variables categóricas frente a fraud, echo=FALSE}
+# Relación de las variables factor frente a la variable de respuesta
+# Función para gráficos de barras de las variables tipo factor en relación a la variable de respuesta
+Plot_Bar <- function(Datos,l){ # Datos para ingresar el vector de datos y l el numero de variable en Data
+  # Dar formato a los números que aparecen en la escala y de las gráficas
+  marks_no_sci <- function(x) format(x, big.mark = ".", decimal.mark = ",", scientific = FALSE)
+  # Definición de paletas de colores
+  Paletas = c("Accent","Accent","Dark2","Paired","Pastel1","Pastel2","Set1","Set2","Set3")
+  # Generación del gráfico
+  g<- ggplot(Data, aes(x=Datos, fill=fraud)) + 
+    geom_bar(position="dodge", stat="count") +
+    scale_y_continuous(labels = marks_no_sci) +
+    xlab("") + ylab("Cantidad de registros") +
+    scale_fill_brewer(palette=Paletas[sample(1:length(Paletas),1)]) + 
+    labs(fill = "Fraude") + 
+    ggtitle(paste(Variables[l,1],"\n","Si(1) - No(2)")) +
+    geom_text(stat='count', aes(x = Datos,label = ..count..), 
+              position = position_dodge(width = 1),
+              vjust = -0.2, hjust= 0.4, size = 3)
+  return(g)
+}
+# Generar gráficas de las variables tipo factor en relación a la variable de respuesta
+plot_grid(Plot_Bar(Data[,4],4),
+          Plot_Bar(Data[,5],5)
+          )
+
+plot_grid(Plot_Bar(Data[,6],6),
+          Plot_Bar(Data[,7],7) 
+          )
+```
+
+## 5. Conclusiones
+
+El conjunto de datos asociados a los eventos de fraude para transacciones realizadas con tarjeta se puede clasificar en dos grupos de variables: las numéricas y las categóricas.
+
+El análisis inicial realizado permite observar que las variables numéricas ofrecen información limitada respecto a los resultados a los eventos de fraude que se identifican. Se observan datos atípicos que podrían ser excluidos del conjunto de datos, se considera que esta acción no acarrearía perdida de información en cuanto a la variable de respuesta (fraude), adicionalmente facilitaría un análisis más detallado que permita verificar si existe o no colinealidad entre estas tres variables.
+
+Cabe resaltar que la información disponible alrededor del conjunto de datos carece de detalles para las variables relacionadas a los datos de distancia: no se precisa la unidad de medida de la misma, por lo que se asume que ambas variables están en la misma unidad.
+
+En cuanto a las variables categóricas la información encontrada es interesante, se puede observar influencia de las mismas en el comportamiento del fraude, es decir, un estudio más profundo de los datos podría llevar a la explicación del comportamiento de las variable podría llevar a una explicación de los eventos que pueden considerarse como fraude.
+
+El análisis presentado incluye el análisis individual de cada variable así como un análisis bivariado teniendo en común la variable de respuesta. Este análisis se puede ampliar incluyendo análisis bivariado entre atributos independientes. En todo caso, el presente análisis incluye una segunda parte que incluye un análisis que plantea la comparación de modelos de clasificación que contemplan la interacción de las variables definitivas previas a un proceso de reducción de dimensionalidad (si el mismo es posible)
