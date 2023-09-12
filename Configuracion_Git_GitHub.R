@@ -5,6 +5,9 @@ library(usethis)
 create_github_token()
 use_git()
 
+getwd()
+setwd("/home/jairoescrito/OneDrive/Documentos/TeslaTeach/Proyectos/Analisis_Tesla")
+
 '
 Inicializar un repositorio de Git
 '
