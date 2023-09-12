@@ -15,11 +15,11 @@ library(tidyverse)
 
 Dataset: [card_transdata](https://www.kaggle.com/datasets/elakiyasekar/card-transdata "Elakiya Sekar")
 
-El dataset mencionado, disponible en la pagina web de [Kaggle](#0), incluye informacion de compras realizadas con tarjeta (se supone tarjetas de credito). Cada registro contiene datos asociados al lugar de la compra, la diferencia de la compra realizada respecto a la compra promedio del tarjetahabiente, detalles de la compra en relacion a si la tarjeta usada es de chip o si se hizo uso de la clave de la tarjeta al momento de la compra y si la misma fue online, el conjunto de datos condensa estas caracteristicas al concluir si la compra se tipifica como un fraude o si es una compra valida.
+El dataset mencionado, disponible en la pagina web de [Kaggle](#0), incluye información de compras realizadas con tarjeta (se supone tarjetas de crédito). Cada registro contiene datos asociados al lugar de la compra, la diferencia de la compra realizada respecto a la compra promedio del tarjeta-habiente, detalles de la compra en relación a si la tarjeta usada es de chip o si se hizo uso de la clave de la tarjeta al momento de la compra y si la misma fue online, el conjunto de datos condensa estas características al concluir si la compra se tipifica como un fraude o si es una compra valida.
 
-El dataset presenta ciertas limitaciones que a su vez limitan el analisis de los datos, en este sentido, el conjunto de datos no dispone de informacion cronologica, es decir, el punto en el tiempo en el que suceden las transacciones y por ende, tampoco es posible conocer el periodo de tiempo de recoleccion de los datos, adicionalmente, las informacion del conjunto de datos no precisa la unidad de medida de las variables de distancia.
+El dataset presenta ciertas limitaciones que a su vez limitan el análisis de los datos, en este sentido, el conjunto de datos no dispone de información cronológica, es decir, el punto en el tiempo en el que suceden las transacciones y por ende, tampoco es posible conocer el periodo de tiempo de recolección de los datos, adicionalmente, las información del conjunto de datos no precisa la unidad de medida de las variables de distancia.
 
-## 1. Informacion preliminar del conjunto de datos
+## 1. Información preliminar del conjunto de datos
 
 ```{r Cargue de datos, echo=FALSE}
 # Cagar datos a una variable dataframe
@@ -33,20 +33,20 @@ cat("El número de columnas (variables) es de: "
     , ncol(Data)) # Total de variables o atributos (columnas)
 ```
 
-Se entiende como variable de respuesta (o dependiente) "fraud" y las 7 variables restantes como independientes. Con esto, se espera interpretar el comportamiento de las compras tipificadas como fraude en funcion de las 7 variables independientes.
+Se entiende como variable de respuesta (o dependiente) "fraud" y las 7 variables restantes como independientes. Con esto, se espera interpretar el comportamiento de las compras tipificadas como fraude en función de las 7 variables independientes.
 
-### 1.1. Verificacion de existencia de valores perdidos (Missing Values - NA's)
+### 1.1. Verificación de existencia de valores perdidos (Missing Values - NA's)
 
 ```{r missing values, echo=FALSE, message=FALSE, warning=FALSE}
 Nas <- aggr(Data)
 summary(Nas)
 ```
 
-El conjunto de datos en cuestion no presenta valores perdios o NA's, en este caso, no es necesario un proceso de tratamiento.
+El conjunto de datos en cuestión no presenta valores perdidos o NA's, en este caso, no es necesario un proceso de tratamiento.
 
 ## 2. Detalles iniciales por cada variable
 
-Para cada variable se presenta un resumen de los principales parametros de estadistica descriptiva, esto, de acuerdo al tipo de variable. Se resalta que previo a este analisis las variables "distance_from_home", "distance_from_last_transaction" y "ratio_to_median_purchase_price" se mantienen como tipo numerica, las variables restantes se modifican a tipo factor ya que las mismas solo toman dos valores: 1 y 0, interpretando UNO como "SI" y CERO como "NO".
+Para cada variable se presenta un resumen de los principales parámetros de estadística descriptiva, esto, de acuerdo al tipo de variable. Se resalta que previo a este análisis las variables "distance_from_home", "distance_from_last_transaction" y "ratio_to_median_purchase_price" se mantienen como tipo numérica, las variables restantes se modifican a tipo factor ya que las mismas solo toman dos valores: 1 y 0, interpretando UNO como "SI" y CERO como "NO".
 
 ```{r detalles por variable, echo=FALSE}
 # Creación de variables tipo factor
@@ -63,15 +63,15 @@ while (i<=ncol(Data)){
 }
 ```
 
-Inicialmente se puede afirmar que las variables de distancia presentan una gran dispersion, situacion que es evidente dada la diferencia que existe entre la media de cada variable y su valor maximo asi como la diferencia tambien existente entre el valor del tercer cuartil y su valor maximo. Lo anterior puede interpretarse como una posible existencia de datos atipicos, no obstante, es necesario un mayor analisis, en especial la relacion que existente entre los datos cercanos al maximo y la variable de respuesta "fraud".
+Inicialmente se puede afirmar que las variables de distancia presentan una gran dispersión, situación que es evidente dada la diferencia que existe entre la media de cada variable y su valor máximo así como la diferencia también existente entre el valor del tercer cuartil y su valor máximo. Lo anterior puede interpretarse como una posible existencia de datos atípicos, no obstante, es necesario un mayor análisis, en especial la relación que existente entre los datos cercanos al máximo y la variable de respuesta "fraud".
 
-Para el caso de las variables categoricas, se facilitaria su interpretacion si las mismas se presentan en valores relativos, esto es, en porcentajes.
+Para el caso de las variables categóricas, se facilitaría su interpretación si las mismas se presentan en valores relativos, esto es, en porcentajes.
 
 Las siguientes tablas presentan los detalles, de cada una de las variables, de la cantidad de observaciones y el porcentaje de datos ubicados por los valores que toman.
 
 ## 3. Análisis del comportamiento de los datos
 
-En este análisis se dividen las variables en dos grupos: 1) Las variables numericas y 2) las variables categóricas.
+En este análisis se dividen las variables en dos grupos: 1) Las variables numéricas y 2) las variables categóricas.
 
 ### 3.1 Variables numéricas
 
@@ -203,11 +203,11 @@ En este conjunto de variables se observan cinco. Cabe resaltar que todas la vari
 
 -   used_pin_number: ¿el pago incluyo como requisito el ingreso del pin de la tarjeta?
 
--   online_order: ¿es una compra a través de internet?
+-   online_order: ¿es una compra a través de Internet?
 
 -   fraud: ¿el pago realizado se tipifica como un fraude?
 
-Para este grupo de variables se determina la frecuencia según los posibles valores que puede tomar cada una (0 y 1) para todas. En este caso, la distribución de los datos no es tan marcada como en el caso de las variables numéricas. En el caso de la variable de respuesta (fraud) el valor "No" tiene un peso de alrededor del 91%, siendo esta la mayor proporción entre las cinco variables. El el caso de las variables repeat_retailer y used_pin_number los resultados de la respuesta "No" están ligeramente por debajo del 90%; finalmente las variables used_chip y online_order presentan una proporción practicamemente igual donde la respuesta "Si" se presenta con un porcentaje de participación alrededor del 35%.
+Para este grupo de variables se determina la frecuencia según los posibles valores que puede tomar cada una (0 y 1) para todas. En este caso, la distribución de los datos no es tan marcada como en el caso de las variables numéricas. En el caso de la variable de respuesta (fraud) el valor "No" tiene un peso de alrededor del 91%, siendo esta la mayor proporción entre las cinco variables. El el caso de las variables repeat_retailer y used_pin_number los resultados de la respuesta "No" están ligeramente por debajo del 90%; finalmente las variables used_chip y online_order presentan una proporción prácticamente igual donde la respuesta "Si" se presenta con un porcentaje de participación alrededor del 35%.
 
 ```{r Tabla frecuencias variables categóricas y gráficos, echo=FALSE}
 # Función para crear una tabla de frecuencias tipo factor
@@ -269,9 +269,9 @@ Se destaca que el 8.7% de los datos disponibles obedecen a situaciones de fraude
 
 ## 4. Análisis de los datos frente a la variable de respuesta (fraud)
 
-### 4.1 Variables numéricas 
+### 4.1 Variables numéricas
 
-Para cada una de las tres variables numéricas se replantea el gráfico de frecuencias, en este caso se especifica la cantidad de datos comparándolo con el resultado frente a la existencia o no de fraude. Como se mencionó anteriormente, la mayor cantidad de datos se encuentra en el primer rango planteado en cada variable (esto es, alrededor del 99% de las observaciones), al desglosarlo en función del fraude se encuentra que las proporciones se mantienen similar para las tres variable, es decir, alrededor del 91.25% (más de 912.500 observaciones) de los datos se asocian a la no existencia de fraude, mientras alrededor de un 8.75% (alrededor de 87.300 registros) de los datos del mismo rango se asocian a una trasacciones tipificadas como fraude. Los resultados observados podrían dar indicios de una posible colinealidad de las variables, frente a esta situación podría plantearse la exclusión de los datos atípicos identificados en el numeral 3.1.1, esto con el fin de verificar si existe una relación diferente en estas variables frente al fraude y así obtener mayor información que faciliten el entendimiento de los eventos de fraude.
+Para cada una de las tres variables numéricas se replantea el gráfico de frecuencias, en este caso se especifica la cantidad de datos comparándolo con el resultado frente a la existencia o no de fraude. Como se mencionó anteriormente, la mayor cantidad de datos se encuentra en el primer rango planteado en cada variable (esto es, alrededor del 99% de las observaciones), al desglosarlo en función del fraude se encuentra que las proporciones se mantienen similar para las tres variable, es decir, alrededor del 91.25% (más de 912.500 observaciones) de los datos se asocian a la no existencia de fraude, mientras alrededor de un 8.75% (alrededor de 87.300 registros) de los datos del mismo rango se asocian a una transacciones tipificadas como fraude. Los resultados observados podrían dar indicios de una posible colinealidad de las variables, frente a esta situación podría plantearse la exclusión de los datos atípicos identificados en el numeral 3.1.1, esto con el fin de verificar si existe una relación diferente en estas variables frente al fraude y así obtener mayor información que faciliten el entendimiento de los eventos de fraude.
 
 ```{r Variables numericas frente a fraud, echo=FALSE}
 # Relación de las variables numéricas frente a las variables de respuesta
@@ -324,9 +324,9 @@ En cuanto al comportamiento de las variables categóricas, los resultados frente
 
 -   used_chip:el no uso de chip en la transacción comercial es lo más común en los registros disponibles, en este caso se observa un 10% (casi 65.000 observaciones) de transacciones asociadas a fraude. Para el caso de las operaciones en las que se hace uso del chip de la tarjeta el porcentaje de las mismas tipificadas como fraude son del 6% (alrededor de 22.400 registros)
 
--   used_pin_number: en este item, un número alrededor de 87.100 observaciones (cerca del 10%) que mencionan el no uso de pin (clave) de la tarjeta se tipificaron como fraude. Cuando se registra uso del pin de la tarjeta el porcentaje de fraude identificado es inferior al 0.3% (273 transacciones)
+-   used_pin_number: en este ítem, un número alrededor de 87.100 observaciones (cerca del 10%) que mencionan el no uso de pin (clave) de la tarjeta se tipificaron como fraude. Cuando se registra uso del pin de la tarjeta el porcentaje de fraude identificado es inferior al 0.3% (273 transacciones)
 
--   online_order: en el caso de las compras por internet los resultados muestran una mayor proporción de fraudes cuando la transacción cumple esta característica, es decir, un valor cercano al 13% se tipificaron como fraude (un poco mas de 82.700 transacciones) mientras que las compras no realizadas por internet registran un nivel de fraude del de alrededor del 1.35%, esto es, un número cercano a las 47.000 transacciones.
+-   online_order: en el caso de las compras por Internet los resultados muestran una mayor proporción de fraudes cuando la transacción cumple esta característica, es decir, un valor cercano al 13% se tipificaron como fraude (un poco mas de 82.700 transacciones) mientras que las compras no realizadas por Internet registran un nivel de fraude del de alrededor del 1.35%, esto es, un número cercano a las 47.000 transacciones.
 
 ```{r Variables categóricas frente a fraud, echo=FALSE}
 # Relación de las variables factor frente a la variable de respuesta
