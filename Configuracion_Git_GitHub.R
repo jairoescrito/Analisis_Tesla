@@ -2,6 +2,7 @@
 Configurar Git
 '
 library(usethis)
+use_git()
 create_github_token()
 use_git()
 
@@ -14,7 +15,7 @@ Inicializar un repositorio de Git
 install.packages("credentials")
 library(credentials)
 set_github_pat()
-"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"
+"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"
 '
 Modificar credenciales
 '
