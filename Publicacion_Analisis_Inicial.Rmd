@@ -15,7 +15,7 @@ library(tidyverse)
 
 Dataset: [card_transdata](https://www.kaggle.com/datasets/elakiyasekar/card-transdata "Elakiya Sekar")
 
-El dataset mencionado, disponible en la pagina web de [Kaggle](#0), incluye información de compras realizadas con tarjeta (se supone tarjetas de crédito). Cada registro contiene datos asociados al lugar de la compra, la diferencia de la compra realizada respecto a la compra promedio del tarjeta-habiente, detalles de la compra en relación a si la tarjeta usada es de chip o si se hizo uso de la clave de la tarjeta al momento de la compra y si la misma fue online, el conjunto de datos condensa estas características al concluir si la compra se tipifica como un fraude o si es una compra valida.
+El dataset mencionado, disponible en la pagina web de Kaggle, incluye información de compras realizadas con tarjeta (se supone tarjetas de crédito). Cada registro contiene datos asociados al lugar de la compra, la diferencia de la compra realizada respecto a la compra promedio del tarjeta-habiente, detalles de la compra en relación a si la tarjeta usada es de chip o si se hizo uso de la clave de la tarjeta al momento de la compra y si la misma fue online, el conjunto de datos condensa estas características al concluir si la compra se tipifica como un fraude o si es una compra valida.
 
 El dataset presenta ciertas limitaciones que a su vez limitan el análisis de los datos, en este sentido, el conjunto de datos no dispone de información cronológica, es decir, el punto en el tiempo en el que suceden las transacciones y por ende, tampoco es posible conocer el periodo de tiempo de recolección de los datos, adicionalmente, las información del conjunto de datos no precisa la unidad de medida de las variables de distancia.
 
